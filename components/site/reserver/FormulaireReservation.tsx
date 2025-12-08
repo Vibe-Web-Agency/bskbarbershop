@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { services } from "@/data/prix";
+import { supabase, BUSINESS_ID } from "@/lib/supabase";
 
 export default function FormulaireReservation() {
     const [formData, setFormData] = useState({
@@ -15,6 +16,7 @@ export default function FormulaireReservation() {
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const creneaux = [];
     let time = new Date();
@@ -48,16 +50,43 @@ export default function FormulaireReservation() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
+        setError(null);
 
-        // TODO: Envoyer les données à ton API/database
-        console.log("Données de réservation:", formData);
+        try {
+            const { error: insertError } = await supabase
+                .from('reservations')
+                .insert([
+                    {
+                        business_id: BUSINESS_ID,
+                        user_name: formData.nom,
+                        user_phone: formData.telephone,
+                        user_mail: formData.email,
+                        prestation: formData.prestation,
+                        appointment_date: formData.date,
+                        appointment_time: formData.heure,
+                        message: formData.message || null,
+                    }
+                ]);
 
-        // Simulation d'envoi
-        await new Promise((resolve) => setTimeout(resolve, 1500));
+            if (insertError) {
+                console.error("Erreur Supabase:", insertError);
+                console.error("Message:", insertError.message);
+                console.error("Details:", insertError.details);
+                console.error("Hint:", insertError.hint);
+                console.error("Code:", insertError.code);
+                setError(`Erreur: ${insertError.message || insertError.code || "Erreur inconnue"}`);
+                setIsSubmitting(false);
+                return;
+            }
 
-        setIsSubmitting(false);
-        setIsSuccess(true);
-        setFormData({ nom: "", telephone: "", email: "", prestation: "", date: "", heure: "", message: "" });
+            setIsSuccess(true);
+            setFormData({ nom: "", telephone: "", email: "", prestation: "", date: "", heure: "", message: "" });
+        } catch (err) {
+            console.error("Erreur:", err);
+            setError("Une erreur est survenue. Veuillez réessayer.");
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     // Date minimum = aujourd'hui
@@ -220,9 +249,16 @@ export default function FormulaireReservation() {
                                 />
                             </div>
 
+                            {/* ERROR MESSAGE */}
+                            {error && (
+                                <div className="p-4 bg-red-900/30 border border-red-500 rounded-lg text-red-400 text-sm">
+                                    {error}
+                                </div>
+                            )}
+
                             {/* INFO */}
                             <p className="text-sm text-[#888] italic">
-                                La confirmation de votre rendez-vous sera envoyée par SMS.
+                                La confirmation de votre rendez-vous sera envoyée par email.
                             </p>
 
                             {/* SUBMIT */}
