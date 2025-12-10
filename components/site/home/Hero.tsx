@@ -1,5 +1,8 @@
+"use client";
+
 import React from 'react'
 import Link from 'next/link'
+import AnimatedSection from '@/components/ui/AnimatedSection'
 
 const Hero = () => {
   return (
@@ -13,9 +16,7 @@ const Hero = () => {
         loop
         playsInline
         className="
-          absolute inset-0 w-full h-full object-cover
-          blur-1xl opacity-40
-        "
+          absolute inset-0 w-full h-full object-cover blur-1xl opacity-40"
       />
 
 
@@ -27,9 +28,7 @@ const Hero = () => {
           loop
           playsInline
           className="
-            h-[90vh] w-auto 
-            object-cover rounded-xl shadow-2xl
-          "
+            h-[90vh] w-auto object-cover rounded-xl shadow-2xl"
         />
       </div>
 
@@ -39,27 +38,33 @@ const Hero = () => {
 
       <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-6">
 
-        <h1 className={`text-5xl md:text-6xl font-bold text-[#F5F5F5] drop-shadow-xl`}>
-          BSK Barbershop
-        </h1>
+        <AnimatedSection animation="slide-up" delay={0}>
+          <h1 className={`text-5xl md:text-6xl font-bold text-[#F5F5F5] drop-shadow-xl`}>
+            BSK Barbershop
+          </h1>
+        </AnimatedSection>
 
-        <p className="mt-4 text-lg md:text-xl text-[#D0D0D0] max-w-2xl">
-          Excellence, style et savoir-faire.  
-          Une expérience unique pour sublimer votre image.
-        </p>
+        <AnimatedSection animation="fade-in" delay={200}>
+          <p className="mt-4 text-lg md:text-xl text-[#D0D0D0] max-w-2xl">
+            Excellence, style et savoir-faire.
+            Une expérience unique pour sublimer votre image.
+          </p>
+        </AnimatedSection>
 
-        <Link
-          href="/reserver"
-          className="
-            mt-8 inline-block
-            px-8 py-3
-            rounded-lg
-            bg-[#C6A667] text-black font-semibold
-            hover:bg-[#9B8452] transition-colors
-          "
-        >
-          Prendre rendez-vous
-        </Link>
+        <AnimatedSection animation="slide-up" delay={400}>
+          <Link
+            href="/reserver"
+            className="
+              mt-8 inline-block
+              px-8 py-3
+              rounded-lg
+              bg-[#C6A667] text-black font-semibold
+              hover:bg-[#9B8452] transition-colors hover-pulse
+            "
+          >
+            Prendre rendez-vous
+          </Link>
+        </AnimatedSection>
       </div>
     </section>
   )

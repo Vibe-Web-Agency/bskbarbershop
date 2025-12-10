@@ -1,3 +1,5 @@
+import Logo from "@/public/assets/logo.png";
+
 export interface NavbarDropdownItem {
   label: string;
   href: string;
@@ -11,7 +13,7 @@ export interface NavbarLink {
 export interface NavbarData {
   brand: {
     name: string;
-    logo: string | null;
+    logo: typeof Logo;
     href: string;
   };
   links: NavbarLink[];
@@ -24,7 +26,7 @@ export interface NavbarData {
 export const navbarData: NavbarData = {
   brand: {
     name: "BSK Barbershop",
-    logo: null,
+    logo: Logo,
     href: "/",
   },
 

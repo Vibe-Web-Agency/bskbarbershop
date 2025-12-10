@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { GalleryItem } from "../../../data/types";
+import { GalleryItem } from "@/data/galerieItem";
 
 interface GalerieLightboxProps {
     isOpen: boolean;
