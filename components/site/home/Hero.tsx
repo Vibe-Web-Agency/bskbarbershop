@@ -47,7 +47,7 @@ const Hero = () => {
         <AnimatedSection animation="fade-in" delay={200}>
           <p className="mt-4 text-lg md:text-xl text-[#D0D0D0] max-w-2xl">
             Excellence, style et savoir-faire.
-            Une expérience unique pour sublimer votre image.
+            Un salon afro et une expérience unique pour sublimer votre image.
           </p>
         </AnimatedSection>
 
