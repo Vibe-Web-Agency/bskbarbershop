@@ -12,7 +12,7 @@ export default function Histoire() {
                 <AnimatedSection animation="slide-right" className="order-2 md:order-1">
                     <div className="relative w-full h-[400px] rounded-xl overflow-hidden shadow-xl">
                         <Image
-                            src="@/public/assets/photos/sieges.jpeg"
+                            src="/assets/photos/sieges.jpeg"
                             alt="L'intérieur de BSK Barbershop"
                             fill
                             className="object-cover"

@@ -10,7 +10,7 @@ export default function TressesSection() {
       <AnimatedSection animation="slide-right">
         <div className="relative w-full h-[380px] rounded-xl overflow-hidden shadow-xl">
           <Image
-            src="@/public/assets/photos/tresses.jpeg"
+            src="/assets/photos/tresses.jpeg"
             alt="Tresses BSK"
             fill
             className="object-cover"
