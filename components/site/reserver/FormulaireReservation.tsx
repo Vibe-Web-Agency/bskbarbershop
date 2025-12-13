@@ -31,11 +31,6 @@ export default function FormulaireReservation() {
     const [bookedSlots, setBookedSlots] = useState<Record<string, number>>({});
     const [loadingSlots, setLoadingSlots] = useState(false);
 
-    // Debug: afficher le BUSINESS_ID au chargement
-    useEffect(() => {
-        console.log('🏪 BUSINESS_ID configuré:', BUSINESS_ID, '(type:', typeof BUSINESS_ID, ')');
-    }, []);
-
     // Vérifier si une date est un week-end (samedi ou dimanche)
     const isWeekend = (dateStr: string): boolean => {
         const date = new Date(dateStr);
@@ -47,16 +42,28 @@ export default function FormulaireReservation() {
     const fetchBookedSlots = async (selectedDate: string) => {
         setLoadingSlots(true);
         try {
+            // Créer les bornes de la journée en timestamp ISO
+            const dateObj = new Date(selectedDate);
+            dateObj.setHours(0, 0, 0, 0);
+            const startOfDay = dateObj.toISOString();
+            dateObj.setHours(23, 59, 59, 999);
+            const endOfDay = dateObj.toISOString();
+
             const { data, error: fetchError } = await supabase
                 .from('reservations')
-                .select('appointment_time')
-                .eq('business_id', BUSINESS_ID)
-                .eq('appointment_date', selectedDate);
+                .select('date')
+                .eq('user_id', BUSINESS_ID)
+                .gte('date', startOfDay)
+                .lte('date', endOfDay);
 
             if (!fetchError && data) {
                 const counts: Record<string, number> = {};
                 data.forEach((r) => {
-                    const timeSlot = r.appointment_time.substring(0, 5);
+                    // Extraire l'heure du timestamp
+                    const dateObj = new Date(r.date);
+                    const hours = dateObj.getHours().toString().padStart(2, '0');
+                    const minutes = dateObj.getMinutes().toString().padStart(2, '0');
+                    const timeSlot = `${hours}:${minutes}`;
                     counts[timeSlot] = (counts[timeSlot] || 0) + 1;
                 });
                 setBookedSlots(counts);
@@ -124,12 +131,20 @@ export default function FormulaireReservation() {
         setError(null);
 
         try {
+            // Créer les bornes de la journée en timestamp ISO pour la vérification
+            const selectedDateObj = new Date(formData.date);
+            selectedDateObj.setHours(0, 0, 0, 0);
+            const startOfDay = selectedDateObj.toISOString();
+            selectedDateObj.setHours(23, 59, 59, 999);
+            const endOfDay = selectedDateObj.toISOString();
+
             // Vérification côté serveur avant l'insertion
             const { data: currentReservations, error: checkError } = await supabase
                 .from('reservations')
-                .select('appointment_time')
-                .eq('business_id', BUSINESS_ID)
-                .eq('appointment_date', formData.date);
+                .select('date')
+                .eq('user_id', BUSINESS_ID)
+                .gte('date', startOfDay)
+                .lte('date', endOfDay);
 
             if (checkError) {
                 console.error("Erreur vérification:", checkError);
@@ -140,9 +155,12 @@ export default function FormulaireReservation() {
 
             // Compter les réservations pour ce créneau
             const timeSlotNormalized = formData.heure.substring(0, 5);
-            const currentCount = currentReservations?.filter(
-                r => r.appointment_time.substring(0, 5) === timeSlotNormalized
-            ).length || 0;
+            const currentCount = currentReservations?.filter(r => {
+                const dateObj = new Date(r.date);
+                const hours = dateObj.getHours().toString().padStart(2, '0');
+                const minutes = dateObj.getMinutes().toString().padStart(2, '0');
+                return `${hours}:${minutes}` === timeSlotNormalized;
+            }).length || 0;
 
             const maxBookings = isWeekend(formData.date) ? 2 : 1;
 
@@ -154,15 +172,26 @@ export default function FormulaireReservation() {
                 return;
             }
 
+            // Combiner date et heure en un seul timestamp ISO valide
+            const [hours, minutes] = formData.heure.split(':').map(Number);
+            const dateObj = new Date(formData.date);
+            dateObj.setHours(hours, minutes, 0, 0);
+            const dateTimeISO = dateObj.toISOString();
+
+            // Préparer le message avec la prestation incluse
+            const fullMessage = formData.prestation
+                ? `Prestation: ${formData.prestation}${formData.message ? `\n\n${formData.message}` : ''}`
+                : formData.message || null;
+
             const insertData = {
-                business_id: BUSINESS_ID,
-                user_name: formData.nom,
-                user_phone: formData.telephone,
-                user_mail: formData.email,
-                prestation: formData.prestation,
-                appointment_date: formData.date,
-                appointment_time: formData.heure,
-                message: formData.message || null,
+                user_id: BUSINESS_ID,
+                service_id: null,
+                customer_name: formData.nom,
+                customer_phone: formData.telephone,
+                customer_mail: formData.email || null,
+                date: dateTimeISO,
+                message: fullMessage,
+                status: 'scheduled',
             };
 
             console.log('📤 Données à insérer:', insertData);

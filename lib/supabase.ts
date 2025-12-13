@@ -6,4 +6,10 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // ID du business BSK Barbershop
-export const BUSINESS_ID = parseInt(process.env.NEXT_PUBLIC_BUSINESS_ID || '1')
+const businessId = process.env.NEXT_PUBLIC_BUSINESS_ID;
+
+if (!businessId) {
+    throw new Error("NEXT_PUBLIC_BUSINESS_ID is not defined");
+}
+
+export const BUSINESS_ID = businessId;

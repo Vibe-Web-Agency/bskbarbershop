@@ -83,6 +83,9 @@ export default function Footer() {
       <div className="text-center text-xs text-[#777] mt-10">
         © {new Date().getFullYear()} BSK Barbershop. Tous droits réservés.
       </div>
+      <div className="text-center text-xs text-[#777] mt-2">
+        Designed and developed by <a href="https://vibewebagency.fr" target="_blank" rel="noopener noreferrer" className="text-[#C6A667] hover:text-[#D0D0D0] transition">Vibe Web Agency</a>
+      </div>
     </footer>
   );
 }
