@@ -50,27 +50,61 @@ export default function LocksFormRDV() {
             const prestationLabel = prestations.find(p => p.value === formData.prestation)?.label || formData.prestation;
 
             // Préparer le message complet avec la prestation
-            const fullMessage = `Prestation: ${prestationLabel}${formData.message ? `\n\n${formData.message}` : ''}`;
+            const fullMessage = `Prestation : ${prestationLabel}${formData.message ? `\n\n${formData.message}` : ''}`;
 
             const insertData = {
                 user_id: BUSINESS_ID,
-                service_id: null,
+                // service_id: formData.prestation,
                 customer_name: formData.nom,
                 customer_phone: formData.telephone,
-                customer_mail: formData.email || null,
-                date: null, // Pas de date pour les demandes locks/tresses (sur demande)
+                customer_email: formData.email.toLowerCase(),
                 message: fullMessage,
                 status: 'pending', // En attente car c'est une demande de devis
             };
 
+            // Envoyer les emails (client + admin) via l'API
+            try {
+                // Email au client
+                if (formData.email) {
+                    await fetch('/api/send-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            to: formData.email,
+                            clientName: formData.nom,
+                            service: prestationLabel,
+                            type: 'locks-request'
+                        })
+                    });
+                    console.log('📧 Email client envoyé');
+                }
+
+                // Email au gérant
+                await fetch('/api/send-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        clientName: formData.nom,
+                        clientPhone: formData.telephone,
+                        clientEmail: formData.email || undefined,
+                        service: prestationLabel,
+                        message: formData.message || undefined,
+                        type: 'admin-new-quote'
+                    })
+                });
+                console.log('📧 Notification admin envoyée');
+            } catch (emailErr) {
+                console.warn('⚠️ Email non envoyé:', emailErr);
+                // On continue même si l'email échoue
+            }
+
             console.log('📤 Données demande locks/tresses à insérer:', insertData);
 
-            const { data: insertedData, error: insertError } = await supabase
-                .from('reservations')
-                .insert([insertData])
-                .select();
+            const { error: insertError } = await supabase
+                .from('quotes')
+                .insert([insertData]);
 
-            console.log('📥 Résultat insertion demande:', { insertedData, insertError });
+            console.log('📥 Résultat insertion demande:', { error: insertError });
 
             if (insertError) {
                 console.error("Erreur Supabase:", insertError);
@@ -79,14 +113,7 @@ export default function LocksFormRDV() {
                 return;
             }
 
-            if (!insertedData || insertedData.length === 0) {
-                console.error("⚠️ Aucune donnée retournée - possible problème RLS");
-                setError("Erreur: La demande n'a pas été enregistrée. Contactez l'administrateur.");
-                setIsSubmitting(false);
-                return;
-            }
-
-            console.log('✅ Demande locks/tresses enregistrée avec succès:', insertedData);
+            console.log('✅ Demande locks/tresses enregistrée avec succès');
             setIsSuccess(true);
             setFormData({ nom: "", telephone: "", email: "", prestation: "", message: "" });
         } catch (err) {

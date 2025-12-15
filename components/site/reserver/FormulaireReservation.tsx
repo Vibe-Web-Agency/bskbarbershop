@@ -218,6 +218,56 @@ export default function FormulaireReservation() {
             }
 
             console.log('✅ Réservation enregistrée avec succès:', insertedData);
+
+            // Formater la date pour les emails
+            const dateForEmail = new Date(formData.date).toLocaleDateString('fr-FR', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            // Mettre la première lettre en majuscule
+            const formattedDate = dateForEmail.charAt(0).toUpperCase() + dateForEmail.slice(1);
+
+            // Envoyer les emails (client + admin)
+            try {
+                // Email de confirmation au client
+                if (formData.email) {
+                    await fetch('/api/send-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            to: formData.email,
+                            clientName: formData.nom,
+                            service: formData.prestation,
+                            date: formattedDate,
+                            time: formData.heure,
+                            type: 'appointment-confirmation'
+                        })
+                    });
+                    console.log('📧 Email confirmation client envoyé');
+                }
+
+                // Notification au gérant
+                await fetch('/api/send-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        clientName: formData.nom,
+                        clientPhone: formData.telephone,
+                        clientEmail: formData.email || undefined,
+                        service: formData.prestation,
+                        date: formattedDate,
+                        time: formData.heure,
+                        type: 'admin-new-reservation'
+                    })
+                });
+                console.log('📧 Notification admin envoyée');
+            } catch (emailErr) {
+                console.warn('⚠️ Emails non envoyés:', emailErr);
+                // On continue même si les emails échouent
+            }
+
             setIsSuccess(true);
             await fetchBookedSlots(formData.date);
             setFormData({ nom: "", telephone: "", email: "", prestation: "", date: "", heure: "", message: "" });
