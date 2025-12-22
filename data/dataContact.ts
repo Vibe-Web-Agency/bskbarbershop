@@ -1,6 +1,6 @@
 export const contactInfo = {
-    phone: "07 82 45 11 73",
-    phoneLink: "tel:+33782451173",
+    phone: "07 83 84 79 02",
+    phoneLink: "tel:+33783847902",
     email: "contact@bskbarbershop.fr",
     address: "10 rue du Vieux Pilori",
     city: "Mantes-la-Jolie, 78200",
