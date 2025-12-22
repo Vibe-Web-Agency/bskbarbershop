@@ -16,12 +16,14 @@ import {
 } from "@/components/ui/forms";
 
 export default function FormulaireReservation() {
+    const today = new Date().toISOString().split("T")[0];
+
     const [formData, setFormData] = useState({
         nom: "",
         telephone: "",
         email: "",
         prestation: "",
-        date: "",
+        date: today,
         heure: "",
         message: "",
     });
@@ -30,6 +32,11 @@ export default function FormulaireReservation() {
     const [error, setError] = useState<string | null>(null);
     const [bookedSlots, setBookedSlots] = useState<Record<string, number>>({});
     const [loadingSlots, setLoadingSlots] = useState(false);
+
+    // Charger les créneaux réservés au démarrage (date du jour par défaut)
+    useEffect(() => {
+        fetchBookedSlots(today);
+    }, []);
 
     // Vérifier si une date est un week-end (samedi ou dimanche)
     const isWeekend = (dateStr: string): boolean => {
@@ -83,6 +90,20 @@ export default function FormulaireReservation() {
         return count < maxBookings;
     };
 
+    // Vérifier si un créneau est dans le passé (pour aujourd'hui)
+    const isSlotInPast = (slot: string): boolean => {
+        if (!formData.date) return false;
+        const today = new Date().toISOString().split('T')[0];
+        if (formData.date !== today) return false;
+
+        const now = new Date();
+        const [slotHours, slotMinutes] = slot.split(':').map(Number);
+        const slotTime = new Date();
+        slotTime.setHours(slotHours, slotMinutes, 0, 0);
+
+        return slotTime <= now;
+    };
+
     // Générer les créneaux horaires
     const creneaux: SelectOption[] = [];
     let time = new Date();
@@ -94,12 +115,17 @@ export default function FormulaireReservation() {
         const hours = time.getHours().toString().padStart(2, '0');
         const minutes = time.getMinutes().toString().padStart(2, '0');
         const slot = `${hours}:${minutes}`;
+        const inPast = isSlotInPast(slot);
         const available = isSlotAvailable(slot);
-        creneaux.push({
-            value: slot,
-            label: `${slot}${!available ? ' ── complet' : ''}`,
-            disabled: !available,
-        });
+
+        // Ne pas afficher les créneaux passés pour aujourd'hui
+        if (!inPast) {
+            creneaux.push({
+                value: slot,
+                label: `${slot}${!available ? ' ── complet' : ''}`,
+                disabled: !available,
+            });
+        }
         time.setMinutes(time.getMinutes() + 45);
     }
 
@@ -279,8 +305,6 @@ export default function FormulaireReservation() {
             setIsSubmitting(false);
         }
     };
-
-    const today = new Date().toISOString().split("T")[0];
 
     return (
         <FormWrapper>
