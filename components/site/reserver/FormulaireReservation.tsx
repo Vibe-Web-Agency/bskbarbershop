@@ -79,7 +79,7 @@ export default function FormulaireReservation() {
     const isSlotAvailable = (slot: string): boolean => {
         if (!formData.date) return true;
         const count = bookedSlots[slot] || 0;
-        const maxBookings = isWeekend(formData.date) ? 2 : 1;
+        const maxBookings = 2; // 2 sièges disponibles toute la semaine
         return count < maxBookings;
     };
 
@@ -162,7 +162,8 @@ export default function FormulaireReservation() {
                 return `${hours}:${minutes}` === timeSlotNormalized;
             }).length || 0;
 
-            const maxBookings = isWeekend(formData.date) ? 2 : 1;
+            // const maxBookings = isWeekend(formData.date) ? 2 : 1;
+            const maxBookings = 2;
 
             if (currentCount >= maxBookings) {
                 await fetchBookedSlots(formData.date);
