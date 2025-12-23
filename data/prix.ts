@@ -3,9 +3,9 @@ export const services = {
     { name: "Coupe + barbe", price: "23€" },
     { name: "Coupe simple", price: "18€" },
     { name: "Coupe enfant", price: "13€" },
-    { name: "Contours", price: "8€" },
-    { name: "Barbe", price: "10€" },
-    { name: "Contours + barbe", price: "10€" },
+    { name: "Contours", price: "11€" },
+    { name: "Barbe", price: "13€" },
+    { name: "Contours + barbe", price: "13€" },
     { name: "Coupe + coloration", price: "50€" },
   ],
 
@@ -41,7 +41,7 @@ export const services = {
 
   soinVisageComplet: [{
     name: "Soins visage complet",
-    price: "45€",
+    price: "50€",
     steps: [
       "Nettoyage",
       "Gommage",
