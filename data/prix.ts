@@ -1,6 +1,7 @@
 export const services = {
   coiffure: [
     { name: "Coupe + barbe", price: "23€" },
+    { name: "Coupe + design", price: "20€" },
     { name: "Coupe simple", price: "18€" },
     { name: "Coupe enfant", price: "13€" },
     { name: "Contours", price: "11€" },

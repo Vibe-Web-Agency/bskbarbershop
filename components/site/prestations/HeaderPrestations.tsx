@@ -22,6 +22,9 @@ export default function HeaderPrestations() {
                     <p className="text-[#D0D0D0] text-lg md:text-xl leading-relaxed max-w-2xl mx-auto">
                         Découvrez l'ensemble de nos services : coiffure, tresses, locks et soins visage.
                     </p>
+                    <p className="text-[#D0D0D0] text-lg md:text-xl leading-relaxed max-w-2xl mx-auto">
+                       Les prix correspondent à la tarification sur réservation.
+                    </p>
                 </AnimatedSection>
 
             </div>
