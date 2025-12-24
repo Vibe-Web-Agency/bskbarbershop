@@ -310,9 +310,9 @@ export default function FormulaireReservation() {
         <FormWrapper>
             {isSuccess ? (
                 <FormSuccessMessage
-                    title="Réservation envoyée !"
-                    message="Nous vous confirmerons votre rendez-vous très rapidement."
-                    subMessage="Un mail de confirmation vous sera envoyé."
+                    title="Réservation confirmée !"
+                    message="Un mail de confirmation vous sera envoyé."
+                    // subMessage=""
                     onReset={() => setIsSuccess(false)}
                     resetButtonText="Nouvelle réservation"
                 />
