@@ -6,11 +6,11 @@ import AnimatedSection from "@/components/ui/AnimatedSection";
 
 export default function GalerieSection() {
   const items = [
-    { type: "image", src: "/assets/photos/canape.jpeg" },
+    { type: "video", src: "/assets/videos/RFK.webm", objectPosition: "center 70%" },
     { type: "image", src: "/assets/photos/fade1.jpeg" },
     { type: "video", src: "/assets/videos/1.mp4" },
     { type: "video", src: "/assets/videos/3.mp4" },
-    { type: "image", src: "/assets/photos/fade2.jpeg" },
+    { type: "image", src: "/assets/photos/fade2.jpeg", objectPosition: "center 50%" },
     { type: "image", src: "/assets/photos/sieges.jpeg" },
   ];
 
@@ -50,6 +50,7 @@ export default function GalerieSection() {
                     loop
                     playsInline
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    style={{ objectPosition: item.objectPosition || "center" }}
                   />
                 )}
 
