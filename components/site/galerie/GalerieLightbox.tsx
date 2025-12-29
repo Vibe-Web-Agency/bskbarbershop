@@ -1,6 +1,12 @@
 import Image from "next/image";
 import { GalleryItem } from "@/data/galerieItem";
 
+// Helper function to check if file is a video
+function isVideo(src: string): boolean {
+    const videoExtensions = ['.webm', '.mp4', '.mov', '.avi', '.mkv'];
+    return videoExtensions.some(ext => src.toLowerCase().endsWith(ext));
+}
+
 interface GalerieLightboxProps {
     isOpen: boolean;
     currentImage: GalleryItem | null;
@@ -40,15 +46,25 @@ export default function GalerieLightbox({
             </button>
 
             <div
-                className="relative max-w-5xl max-h-[85vh] w-full h-full"
+                className="relative max-w-5xl max-h-[85vh] w-full h-full flex items-center justify-center"
                 onClick={(e) => e.stopPropagation()}
             >
-                <Image
-                    src={currentImage.src}
-                    alt={currentImage.title}
-                    fill
-                    className="object-contain"
-                />
+                {isVideo(currentImage.src) ? (
+                    <video
+                        src={currentImage.src}
+                        controls
+                        autoPlay
+                        playsInline
+                        className="max-w-full max-h-[80vh] object-contain"
+                    />
+                ) : (
+                    <Image
+                        src={currentImage.src}
+                        alt={currentImage.title}
+                        fill
+                        className="object-contain"
+                    />
+                )}
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 text-center">
                     <h3 className="text-xl font-bold text-white">{currentImage.title}</h3>
                 </div>

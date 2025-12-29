@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import { GalleryItem } from "@/data/galerieItem";
 
@@ -5,6 +7,23 @@ interface GalerieGridProps {
     items: GalleryItem[];
     categories: { id: string; label: string }[];
     onImageClick: (item: GalleryItem) => void;
+}
+
+// Helper function to check if file is a video
+function isVideo(src: string): boolean {
+    const videoExtensions = ['.webm', '.mp4', '.mov', '.avi', '.mkv'];
+    return videoExtensions.some(ext => src.toLowerCase().endsWith(ext));
+}
+
+// Handle video hover play/pause
+function handleVideoHover(e: React.MouseEvent<HTMLVideoElement>, action: 'play' | 'pause') {
+    const video = e.currentTarget;
+    if (action === 'play') {
+        video.play();
+    } else {
+        video.pause();
+        video.currentTime = 0;
+    }
 }
 
 export default function GalerieGrid({ items, categories, onImageClick }: GalerieGridProps) {
@@ -22,12 +41,26 @@ export default function GalerieGrid({ items, categories, onImageClick }: Galerie
                         }}
                     >
                         <div className={`relative ${item.aspect === "portrait" ? "h-[450px]" : "h-[350px]"}`}>
-                            <Image
-                                src={item.src}
-                                alt={item.title}
-                                fill
-                                className="object-cover object-top transition-transform duration-700 group-hover:scale-110"
-                            />
+                            {isVideo(item.src) ? (
+                                <video
+                                    src={item.src}
+                                    muted
+                                    loop
+                                    playsInline
+                                    onMouseEnter={(e) => handleVideoHover(e, 'play')}
+                                    onMouseLeave={(e) => handleVideoHover(e, 'pause')}
+                                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                    style={{ objectPosition: item.objectPosition || 'top' }}
+                                />
+                            ) : (
+                                <Image
+                                    src={item.src}
+                                    alt={item.title}
+                                    fill
+                                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                                    style={{ objectPosition: item.objectPosition || 'top' }}
+                                />
+                            )}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                             <div className="absolute bottom-0 left-0 right-0 p-6 translate-y-full group-hover:translate-y-0 transition-transform duration-500">

@@ -11,7 +11,7 @@ export const services = {
   ],
 
   tresses: [
-    { name: "Vanilles", price: "35-40€" },
+    { name: "Vanilles", price: "40-45€" },
     { name: "Barrel twist", price: "45-50€" },
     { name: "Nattes collées sans motif", price: "30€" },
     { name: "Nattes collées avec motif", price: "35€" },
