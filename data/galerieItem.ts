@@ -20,7 +20,6 @@ export const galleryItems: GalleryItem[] = [
     
     { id: 3, src: "/assets/videos/Tresses.webm", category: "tresses", title: "Tresses Femme", aspect: "portrait" },
     { id: 16, src: "/assets/photos/IMG_1581.webp", category: "tresses", title: "Nattes style", aspect: "portrait" },
-    { id: 5, src: "/assets/photos/IMG_0141.jpeg", category: "tresses", title: "Tresses Femme", aspect: "portrait" },
     { id: 6, src: "/assets/photos/IMG_0269.jpeg", category: "tresses", title: "Tresses Homme", aspect: "portrait" },
     { id: 15, src: "/assets/photos/IMG_1035.webp", category: "coupes", title: "Fade Net", aspect: "portrait", objectPosition: "bottom" },
     { id: 22, src: "/assets/photos/WhatsApp Image 2025-12-22 at 15.32.57.webp", category: "coupes", title: "Locks Twist", aspect: "portrait" },
