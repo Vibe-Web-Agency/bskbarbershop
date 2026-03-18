@@ -114,7 +114,7 @@ export function getAppointmentConfirmationTemplate({
                                 <tr>
                                     <td style="color: #888; font-size: 13px; line-height: 1.8;">
                                         <p style="margin: 0 0 5px 0;">📍 10 rue du Vieux Pilori, 78200 Mantes-la-Jolie</p>
-                                        <p style="margin: 0 0 5px 0;">📞 <a href="tel:0782451173">07 82 45 11 73</a></p>
+                                        <p style="margin: 0 0 5px 0;">📞 <a href="tel:0783847902">07 83 84 79 02</a></p>
                                         <p style="margin: 0;">🌐 <a href="https://bskbarbershop.fr">bskbarbershop.fr</a></p>
                                     </td>
                                 </tr>

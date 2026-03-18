@@ -311,7 +311,7 @@ export default function FormulaireReservation() {
             {isSuccess ? (
                 <FormSuccessMessage
                     title="Réservation confirmée !"
-                    message="Un mail de confirmation vous sera envoyé."
+                    message="Merci pour votre confiance. Nous avons hâte de vous accueillir."
                     // subMessage=""
                     onReset={() => setIsSuccess(false)}
                     resetButtonText="Nouvelle réservation"
