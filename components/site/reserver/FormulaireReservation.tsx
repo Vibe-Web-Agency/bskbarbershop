@@ -38,11 +38,11 @@ export default function FormulaireReservation() {
         fetchBookedSlots(today);
     }, []);
 
-    // Vérifier si une date est un week-end (samedi ou dimanche)
-    const isWeekend = (dateStr: string): boolean => {
+    // Vérifier si une date est un jour de fermeture (lundi)
+    const isClosedDay = (dateStr: string): boolean => {
         const date = new Date(dateStr);
-        const day = date.getDay(); // 0 = dimanche, 6 = samedi
-        return day === 0 || day === 6;
+        const day = date.getDay(); // 0 = dimanche, 1 = lundi, 6 = samedi
+        return day === 1; // Fermé le lundi
     };
 
     // Récupérer les créneaux réservés pour une date donnée
@@ -144,8 +144,15 @@ export default function FormulaireReservation() {
         const { name, value } = e.target;
 
         if (name === 'date' && value) {
-            fetchBookedSlots(value);
-            setFormData({ ...formData, date: value, heure: '' });
+            if (isClosedDay(value)) {
+                setError("Le salon est fermé le lundi. Veuillez choisir un autre jour.");
+                setFormData({ ...formData, date: value, heure: '' });
+                setBookedSlots({});
+            } else {
+                setError(null);
+                fetchBookedSlots(value);
+                setFormData({ ...formData, date: value, heure: '' });
+            }
         } else {
             setFormData({ ...formData, [name]: value });
         }
@@ -155,6 +162,13 @@ export default function FormulaireReservation() {
         e.preventDefault();
         setIsSubmitting(true);
         setError(null);
+
+        // Vérification jour de fermeture (lundi)
+        if (isClosedDay(formData.date)) {
+            setError("Le salon est fermé le lundi. Veuillez choisir un autre jour.");
+            setIsSubmitting(false);
+            return;
+        }
 
         try {
             // Créer les bornes de la journée en timestamp ISO pour la vérification
@@ -347,6 +361,7 @@ export default function FormulaireReservation() {
                         name="email"
                         label="Email"
                         type="email"
+                        required
                         value={formData.email}
                         onChange={handleChange}
                         placeholder="votre@email.com"
@@ -376,18 +391,26 @@ export default function FormulaireReservation() {
                             value={formData.date}
                             onChange={handleChange}
                         />
-                        <FormSelect
-                            id="heure"
-                            name="heure"
-                            label="Heure souhaitée"
-                            required
-                            value={formData.heure}
-                            onChange={handleChange}
-                            options={creneaux}
-                            placeholder="Choisir un créneau"
-                            loading={loadingSlots}
-                            loadingText="Chargement..."
-                        />
+                        {formData.date && isClosedDay(formData.date) ? (
+                            <div className="flex items-center">
+                                <p className="text-[#C6A667] text-sm font-medium">
+                                    Fermé le lundi
+                                </p>
+                            </div>
+                        ) : (
+                            <FormSelect
+                                id="heure"
+                                name="heure"
+                                label="Heure souhaitée"
+                                required
+                                value={formData.heure}
+                                onChange={handleChange}
+                                options={creneaux}
+                                placeholder="Choisir un créneau"
+                                loading={loadingSlots}
+                                loadingText="Chargement..."
+                            />
+                        )}
                     </div>
 
                     {/* MESSAGE */}
