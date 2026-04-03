@@ -59,7 +59,7 @@ export default function FormulaireReservation() {
             const { data, error: fetchError } = await supabase
                 .from('reservations')
                 .select('date')
-                .eq('user_id', BUSINESS_ID)
+                .eq('business_id', BUSINESS_ID)
                 .gte('date', startOfDay)
                 .lte('date', endOfDay);
 
@@ -182,7 +182,7 @@ export default function FormulaireReservation() {
             const { data: currentReservations, error: checkError } = await supabase
                 .from('reservations')
                 .select('date')
-                .eq('user_id', BUSINESS_ID)
+                .eq('business_id', BUSINESS_ID)
                 .gte('date', startOfDay)
                 .lte('date', endOfDay);
 
@@ -225,7 +225,7 @@ export default function FormulaireReservation() {
                 : formData.message || null;
 
             const insertData = {
-                user_id: BUSINESS_ID,
+                business_id: BUSINESS_ID,
                 service_id: null,
                 customer_name: formData.nom,
                 customer_phone: formData.telephone,
