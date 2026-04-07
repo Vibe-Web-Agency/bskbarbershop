@@ -24,6 +24,7 @@ export default function Footer() {
             <li><Link href="/galerie" className="hover:text-[#C6A667] transition">Galerie</Link></li>
             <li><Link href="/a-propos" className="hover:text-[#C6A667] transition">À propos</Link></li>
             <li><Link href="/contact" className="hover:text-[#C6A667] transition">Contact</Link></li>
+            <li><Link href="/avis" className="hover:text-[#C6A667] transition">Avis clients</Link></li>
           </ul>
         </div>
 

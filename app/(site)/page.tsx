@@ -3,6 +3,7 @@ import Pricing from "@/components/site/home/Pricing";
 import LocksTressesSection from "@/components/site/home/LocksTressesSection";
 import GalerieSection from "@/components/site/home/GalerieSection";
 import AProposSection from "@/components/site/home/AProposSection";
+import ReviewsSection from "@/components/site/home/ReviewsSection";
 import ContactSection from "@/components/site/home/ContactSection";
 
 export default function HomePage() {
@@ -13,6 +14,7 @@ export default function HomePage() {
       <LocksTressesSection />
       <GalerieSection />
       <AProposSection />
+      <ReviewsSection />
       <ContactSection />
     </>
   );
