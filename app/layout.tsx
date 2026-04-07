@@ -70,6 +70,11 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <head>
+        {/* VWA Tracker */}
+        <Script
+          src={`https://tracker-production-9a75.up.railway.app/track.js?id=${process.env.NEXT_PUBLIC_BUSINESS_ID}`}
+          strategy="afterInteractive"
+        />
         {/* Google Analytics */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-HCG82NENYK"
