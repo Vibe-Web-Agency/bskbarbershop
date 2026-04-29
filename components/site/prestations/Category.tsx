@@ -8,7 +8,7 @@ export default function Category({
   delay = 0,
 }: {
   title: string;
-  items: { name: string; price: string }[];
+  items: { name: string; price: string; description?: string | null }[];
   delay?: number;
 }) {
   return (
@@ -20,10 +20,15 @@ export default function Category({
           {items.map((item, i) => (
             <li
               key={i}
-              className="flex justify-between border-b border-white/10 pb-2"
+              className="flex justify-between items-start border-b border-white/10 pb-2"
             >
-              <span>{item.name}</span>
-              <span className="font-semibold text-white">{item.price}</span>
+              <div>
+                <span>{item.name}</span>
+                {item.description && (
+                  <p className="text-xs text-[#888] mt-0.5">{item.description}</p>
+                )}
+              </div>
+              <span className="font-semibold text-white shrink-0 ml-4">{item.price}</span>
             </li>
           ))}
         </ul>
