@@ -86,7 +86,7 @@ export default function FormulaireReservation() {
     const isSlotAvailable = (slot: string): boolean => {
         if (!formData.date) return true;
         const count = bookedSlots[slot] || 0;
-        const maxBookings = 2; // 2 sièges disponibles toute la semaine
+        const maxBookings = 1; // 2 sièges disponibles toute la semaine
         return count < maxBookings;
     };
 
@@ -160,6 +160,7 @@ export default function FormulaireReservation() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (isSubmitting) return;
         setIsSubmitting(true);
         setError(null);
 

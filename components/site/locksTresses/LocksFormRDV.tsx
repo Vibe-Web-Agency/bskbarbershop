@@ -42,6 +42,7 @@ export default function LocksFormRDV() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (isSubmitting) return;
         setIsSubmitting(true);
         setError(null);
 
