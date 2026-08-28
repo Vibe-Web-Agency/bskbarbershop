@@ -38,11 +38,9 @@ export default function FormulaireReservation() {
         fetchBookedSlots(today);
     }, []);
 
-    // Vérifier si une date est un jour de fermeture (lundi)
-    const isClosedDay = (dateStr: string): boolean => {
-        const date = new Date(dateStr);
-        const day = date.getDay(); // 0 = dimanche, 1 = lundi, 6 = samedi
-        return day === 1; // Fermé le lundi
+    // Vérifier si une date est un jour de fermeture
+    const isClosedDay = (_dateStr: string): boolean => {
+        return false; // Salon ouvert tous les jours
     };
 
     // Récupérer les créneaux réservés pour une date donnée
@@ -86,7 +84,7 @@ export default function FormulaireReservation() {
     const isSlotAvailable = (slot: string): boolean => {
         if (!formData.date) return true;
         const count = bookedSlots[slot] || 0;
-        const maxBookings = 1; // 1 sièges disponibles toute la semaine
+        const maxBookings = 1; // 1 siège disponible toute la semaine
         return count < maxBookings;
     };
 

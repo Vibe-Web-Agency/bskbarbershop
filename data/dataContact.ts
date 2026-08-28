@@ -9,7 +9,7 @@ export const contactInfo = {
 };
 
 export const horaires = [
-    { jour: "Lundi", horaire: "Fermé" },
+    { jour: "Lundi", horaire: "10h00 - 20h00" },
     { jour: "Mardi", horaire: "10h00 - 20h00" },
     { jour: "Mercredi", horaire: "10h00 - 20h00" },
     { jour: "Jeudi", horaire: "10h00 - 20h00" },
