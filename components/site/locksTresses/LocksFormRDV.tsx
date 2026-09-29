@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { supabase, BUSINESS_ID } from "@/lib/supabase";
 import {
     FormInput,
     FormSelect,
@@ -53,63 +52,32 @@ export default function LocksFormRDV() {
             // Préparer le message complet avec la prestation
             const fullMessage = `Prestation : ${prestationLabel}${formData.message ? `\n\n${formData.message}` : ''}`;
 
-            const insertData = {
-                user_id: BUSINESS_ID,
-                // service_id: formData.prestation,
-                customer_name: formData.nom,
-                customer_phone: formData.telephone,
-                customer_email: formData.email.toLowerCase(),
-                message: fullMessage,
-                status: 'pending', // En attente car c'est une demande de devis
-            };
+            /*
+             * L'enregistrement passe par une route d'API.
+             *
+             * Deux choses se corrigent au passage. La clé Supabase ne part
+             * plus dans le navigateur. Et le champ écrit était `user_id`,
+             * une colonne qui N'EXISTE PAS dans `quotes` : l'insertion
+             * échouait donc systématiquement, et aucune demande de
+             * locks/tresses n'est jamais arrivée dans le tableau de bord.
+             */
+            const reponse = await fetch("/api/devis", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    nom: formData.nom,
+                    telephone: formData.telephone,
+                    email: formData.email || null,
+                    prestation: prestationLabel,
+                    message: formData.message || null,
+                }),
+            });
 
-            // Envoyer les emails (client + admin) via l'API
-            try {
-                // Email au client
-                if (formData.email) {
-                    await fetch('/api/send-email', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            to: formData.email,
-                            clientName: formData.nom,
-                            service: prestationLabel,
-                            type: 'locks-request'
-                        })
-                    });
-                    console.log('📧 Email client envoyé');
-                }
-
-                // Email au gérant
-                await fetch('/api/send-email', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        clientName: formData.nom,
-                        clientPhone: formData.telephone,
-                        clientEmail: formData.email || undefined,
-                        service: prestationLabel,
-                        message: formData.message || undefined,
-                        type: 'admin-new-quote'
-                    })
-                });
-                console.log('📧 Notification admin envoyée');
-            } catch (emailErr) {
-                console.warn('⚠️ Email non envoyé:', emailErr);
-                // On continue même si l'email échoue
-            }
-
-            console.log('📤 Données demande locks/tresses à insérer:', insertData);
-
-            const { error: insertError } = await supabase
-                .from('quotes')
-                .insert([insertData]);
-
-            console.log('📥 Résultat insertion demande:', { error: insertError });
+            const insertError = reponse.ok ? null : await reponse.json().catch(() => ({ erreur: "Envoi impossible" }));
 
             if (insertError) {
-                console.error("Erreur Supabase:", insertError);
-                setError(`Erreur: ${insertError.message || insertError.code || "Erreur inconnue"}`);
+                console.error("Erreur d'enregistrement :", insertError);
+                setError(insertError.erreur || "Nous n'avons pas pu enregistrer votre demande.");
                 setIsSubmitting(false);
                 return;
             }

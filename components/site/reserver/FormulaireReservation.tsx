@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { services } from "@/data/prix";
-import { supabase, BUSINESS_ID } from "@/lib/supabase";
+import { CRENEAUX, MAX_PAR_CRENEAU } from "@/lib/creneaux";
 import {
     FormInput,
     FormSelect,
@@ -43,36 +43,23 @@ export default function FormulaireReservation() {
         return false; // Salon ouvert tous les jours
     };
 
-    // Récupérer les créneaux réservés pour une date donnée
+    /*
+     * Les créneaux occupés viennent d'une route d'API qui ne renvoie que des
+     * COMPTAGES.
+     *
+     * Avant, ce composant lisait la table `reservations` directement depuis
+     * le navigateur, avec une clé Supabase embarquée dans la page : n'importe
+     * quel visiteur pouvait donc lire les noms, téléphones et e-mails de
+     * toutes les réservations du projet — celles du salon comme celles des
+     * deux restaurants qui partagent la même base.
+     */
     const fetchBookedSlots = async (selectedDate: string) => {
         setLoadingSlots(true);
         try {
-            // Créer les bornes de la journée en timestamp ISO
-            const dateObj = new Date(selectedDate);
-            dateObj.setHours(0, 0, 0, 0);
-            const startOfDay = dateObj.toISOString();
-            dateObj.setHours(23, 59, 59, 999);
-            const endOfDay = dateObj.toISOString();
-
-            const { data, error: fetchError } = await supabase
-                .from('reservations')
-                .select('date')
-                .eq('business_id', BUSINESS_ID)
-                .gte('date', startOfDay)
-                .lte('date', endOfDay);
-
-            if (!fetchError && data) {
-                const counts: Record<string, number> = {};
-                data.forEach((r) => {
-                    // Extraire l'heure du timestamp
-                    const dateObj = new Date(r.date);
-                    const hours = dateObj.getHours().toString().padStart(2, '0');
-                    const minutes = dateObj.getMinutes().toString().padStart(2, '0');
-                    const timeSlot = `${hours}:${minutes}`;
-                    counts[timeSlot] = (counts[timeSlot] || 0) + 1;
-                });
-                setBookedSlots(counts);
-            }
+            const reponse = await fetch(`/api/reservations/disponibilites?date=${selectedDate}`);
+            if (!reponse.ok) throw new Error("Lecture des créneaux impossible");
+            const { creneaux } = await reponse.json();
+            setBookedSlots(creneaux);
         } catch (err) {
             console.error("Erreur lors de la récupération des créneaux:", err);
         } finally {
@@ -83,9 +70,10 @@ export default function FormulaireReservation() {
     // Vérifier si un créneau est disponible
     const isSlotAvailable = (slot: string): boolean => {
         if (!formData.date) return true;
-        const count = bookedSlots[slot] || 0;
-        const maxBookings = 1; // 1 siège disponible toute la semaine
-        return count < maxBookings;
+        // La capacité vient de `lib/creneaux.ts`, partagé avec le serveur :
+        // c'est lui qui décide vraiment, ce contrôle-ci évite juste un
+        // aller-retour inutile.
+        return (bookedSlots[slot] || 0) < MAX_PAR_CRENEAU;
     };
 
     // Vérifier si un créneau est dans le passé (pour aujourd'hui)
@@ -102,29 +90,17 @@ export default function FormulaireReservation() {
         return slotTime <= now;
     };
 
-    // Générer les créneaux horaires
+    // Les créneaux viennent de `lib/creneaux.ts` : le serveur doit refuser
+    // exactement ce que le formulaire n'affiche pas.
     const creneaux: SelectOption[] = [];
-    let time = new Date();
-    time.setHours(10, 0, 0, 0);
-    const endTime = new Date();
-    endTime.setHours(19, 30, 0, 0);
-
-    while (time <= endTime) {
-        const hours = time.getHours().toString().padStart(2, '0');
-        const minutes = time.getMinutes().toString().padStart(2, '0');
-        const slot = `${hours}:${minutes}`;
-        const inPast = isSlotInPast(slot);
+    for (const slot of CRENEAUX) {
+        if (isSlotInPast(slot)) continue;
         const available = isSlotAvailable(slot);
-
-        // Ne pas afficher les créneaux passés pour aujourd'hui
-        if (!inPast) {
-            creneaux.push({
-                value: slot,
-                label: `${slot}${!available ? ' ── complet' : ''}`,
-                disabled: !available,
-            });
-        }
-        time.setMinutes(time.getMinutes() + 45);
+        creneaux.push({
+            value: slot,
+            label: `${slot}${!available ? " ── complet" : ""}`,
+            disabled: !available,
+        });
     }
 
     // Liste des prestations
@@ -170,94 +146,40 @@ export default function FormulaireReservation() {
         }
 
         try {
-            // Créer les bornes de la journée en timestamp ISO pour la vérification
-            const selectedDateObj = new Date(formData.date);
-            selectedDateObj.setHours(0, 0, 0, 0);
-            const startOfDay = selectedDateObj.toISOString();
-            selectedDateObj.setHours(23, 59, 59, 999);
-            const endOfDay = selectedDateObj.toISOString();
+            /*
+             * Plus de contrôle de disponibilité ici.
+             *
+             * Celui qui s'y trouvait interrogeait la base depuis le
+             * navigateur ET autorisait 2 rendez-vous par créneau, alors que
+             * l'affichage n'en annonçait qu'1 : le salon pouvait donc se
+             * retrouver avec deux clients à la même heure. Le serveur
+             * revérifie désormais, avec la seule valeur qui fait foi,
+             * `MAX_PAR_CRENEAU`, partagée avec l'affichage.
+             */
+            const reponse = await fetch("/api/reservations", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    nom: formData.nom,
+                    telephone: formData.telephone,
+                    email: formData.email || null,
+                    // La date et l'heure partent séparément : c'est le serveur
+                    // qui les assemble dans le fuseau du salon. Les assembler
+                    // ici donnait l'heure du navigateur du visiteur.
+                    date: formData.date,
+                    heure: formData.heure,
+                    prestation: formData.prestation,
+                    message: formData.message || null,
+                }),
+            });
 
-            // Vérification côté serveur avant l'insertion
-            const { data: currentReservations, error: checkError } = await supabase
-                .from('reservations')
-                .select('date')
-                .eq('business_id', BUSINESS_ID)
-                .gte('date', startOfDay)
-                .lte('date', endOfDay);
-
-            if (checkError) {
-                console.error("Erreur vérification:", checkError);
-                setError("Erreur lors de la vérification de disponibilité.");
+            if (!reponse.ok) {
+                const { erreur } = await reponse.json().catch(() => ({}));
+                setError(erreur || "Nous n'avons pas pu enregistrer votre rendez-vous.");
                 setIsSubmitting(false);
                 return;
             }
 
-            // Compter les réservations pour ce créneau
-            const timeSlotNormalized = formData.heure.substring(0, 5);
-            const currentCount = currentReservations?.filter(r => {
-                const dateObj = new Date(r.date);
-                const hours = dateObj.getHours().toString().padStart(2, '0');
-                const minutes = dateObj.getMinutes().toString().padStart(2, '0');
-                return `${hours}:${minutes}` === timeSlotNormalized;
-            }).length || 0;
-
-            // const maxBookings = isWeekend(formData.date) ? 2 : 1;
-            const maxBookings = 2;
-
-            if (currentCount >= maxBookings) {
-                await fetchBookedSlots(formData.date);
-                setFormData(prev => ({ ...prev, heure: '' }));
-                setError("Ce créneau vient d'être réservé par quelqu'un d'autre. Veuillez en choisir un autre.");
-                setIsSubmitting(false);
-                return;
-            }
-
-            // Combiner date et heure en un seul timestamp ISO valide
-            const [hours, minutes] = formData.heure.split(':').map(Number);
-            const dateObj = new Date(formData.date);
-            dateObj.setHours(hours, minutes, 0, 0);
-            const dateTimeISO = dateObj.toISOString();
-
-            // Préparer le message avec la prestation incluse
-            const fullMessage = formData.prestation
-                ? `Prestation: ${formData.prestation}${formData.message ? `\n\n${formData.message}` : ''}`
-                : formData.message || null;
-
-            const insertData = {
-                business_id: BUSINESS_ID,
-                service_id: null,
-                customer_name: formData.nom,
-                customer_phone: formData.telephone,
-                customer_mail: formData.email || null,
-                date: dateTimeISO,
-                message: fullMessage,
-                status: 'scheduled',
-            };
-
-            console.log('📤 Données à insérer:', insertData);
-
-            const { data: insertedData, error: insertError } = await supabase
-                .from('reservations')
-                .insert([insertData])
-                .select();
-
-            console.log('📥 Résultat insertion:', { insertedData, insertError });
-
-            if (insertError) {
-                console.error("Erreur Supabase:", insertError);
-                setError(`Erreur: ${insertError.message || insertError.code || "Erreur inconnue"}`);
-                setIsSubmitting(false);
-                return;
-            }
-
-            if (!insertedData || insertedData.length === 0) {
-                console.error("⚠️ Aucune donnée retournée - possible problème RLS");
-                setError("Erreur: La réservation n'a pas été enregistrée. Contactez l'administrateur.");
-                setIsSubmitting(false);
-                return;
-            }
-
-            console.log('✅ Réservation enregistrée avec succès:', insertedData);
 
             // Formater la date pour les emails
             const dateForEmail = new Date(formData.date).toLocaleDateString('fr-FR', {
