@@ -1,15 +1,31 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+/**
+ * Client Supabase **serveur uniquement**.
+ *
+ * Il était importé par deux composants « use client » — le formulaire de
+ * réservation et celui des locks — donc la clé partait dans le paquet servi
+ * à chaque visiteur. Avec elle, on pouvait lire la table `reservations` en
+ * entier : noms, téléphones et e-mails de tous les commerces du projet, pas
+ * seulement ceux du salon.
+ *
+ * Ces deux formulaires passent désormais par des routes d'API. Ce fichier
+ * n'est plus importé que par des composants serveur ; il reste en place
+ * pour eux.
+ *
+ * Les variables sans préfixe sont préférées, celles avec `NEXT_PUBLIC_`
+ * acceptées en repli. Ça n'affaiblit rien : une variable `NEXT_PUBLIC_`
+ * n'est incluse dans le paquet du navigateur que là où elle est RÉFÉRENCÉE.
+ */
+const url = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL
+const key =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ??
+    process.env.SUPABASE_ANON_KEY ??
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+if (!url || !key) throw new Error("Supabase n'est pas configuré (URL ou clé manquante)")
 
-// ID du business BSK Barbershop
-const businessId = process.env.NEXT_PUBLIC_BUSINESS_ID;
+export const supabase = createClient(url, key)
 
-if (!businessId) {
-    throw new Error("NEXT_PUBLIC_BUSINESS_ID is not defined");
-}
-
-export const BUSINESS_ID = businessId;
+export const BUSINESS_ID =
+    process.env.BUSINESS_ID ?? process.env.NEXT_PUBLIC_BUSINESS_ID ?? ''
