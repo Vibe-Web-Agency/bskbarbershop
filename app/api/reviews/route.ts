@@ -1,10 +1,6 @@
-import { createClient } from "@supabase/supabase-js";
+import { supabase, BUSINESS_ID } from "@/lib/supabase";
 import { NextRequest, NextResponse } from "next/server";
 
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 export async function POST(request: NextRequest) {
     const { author_name, email, rating, comment } = await request.json();
@@ -18,7 +14,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { error } = await supabase.from("reviews").insert({
-        business_id: process.env.NEXT_PUBLIC_BUSINESS_ID,
+        business_id: BUSINESS_ID,
         author_name,
         email,
         rating,

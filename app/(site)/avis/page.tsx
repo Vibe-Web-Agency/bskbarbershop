@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { supabase, BUSINESS_ID } from "@/lib/supabase";
 import { Star } from "lucide-react";
 import ReviewForm from "@/components/site/avis/ReviewForm";
 import type { Metadata } from "next";
@@ -35,15 +35,11 @@ function StarRating({ rating }: { rating: number }) {
 }
 
 export default async function AvisPage() {
-    const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
 
     const { data: reviews } = await supabase
         .from("reviews")
         .select("id, author_name, rating, comment, reply, created_at")
-        .eq("business_id", process.env.NEXT_PUBLIC_BUSINESS_ID)
+        .eq("business_id", BUSINESS_ID)
         .order("created_at", { ascending: false });
 
     const list = (reviews as Review[]) || [];

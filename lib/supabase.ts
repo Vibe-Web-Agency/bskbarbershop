@@ -13,6 +13,11 @@ import { createClient } from '@supabase/supabase-js'
  * n'est plus importé que par des composants serveur ; il reste en place
  * pour eux.
  *
+ * C'est aussi le SEUL endroit du projet qui construit un client. Trois
+ * fichiers le faisaient chacun de leur côté avec `NEXT_PUBLIC_*` : autant
+ * d'endroits où rendre un composant interactif aurait relâché la clé, et
+ * autant de chaînes de repli à tenir à jour.
+ *
  * Les variables sans préfixe sont préférées, celles avec `NEXT_PUBLIC_`
  * acceptées en repli. Ça n'affaiblit rien : une variable `NEXT_PUBLIC_`
  * n'est incluse dans le paquet du navigateur que là où elle est RÉFÉRENCÉE.

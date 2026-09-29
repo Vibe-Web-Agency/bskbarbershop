@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { supabase, BUSINESS_ID } from "@/lib/supabase";
 import { Star } from "lucide-react";
 import Link from "next/link";
 
@@ -21,15 +21,11 @@ function StarRating({ rating }: { rating: number }) {
 }
 
 export default async function ReviewsSection() {
-    const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
 
     const { data: reviews } = await supabase
         .from("reviews")
         .select("id, author_name, rating, comment, created_at")
-        .eq("business_id", process.env.NEXT_PUBLIC_BUSINESS_ID)
+        .eq("business_id", BUSINESS_ID)
         .gte("rating", 4)
         .order("created_at", { ascending: false })
         .limit(3);
@@ -37,7 +33,7 @@ export default async function ReviewsSection() {
     const { data: allReviews } = await supabase
         .from("reviews")
         .select("rating")
-        .eq("business_id", process.env.NEXT_PUBLIC_BUSINESS_ID);
+        .eq("business_id", BUSINESS_ID);
 
     const list = (reviews as Review[]) || [];
     const all = allReviews || [];
