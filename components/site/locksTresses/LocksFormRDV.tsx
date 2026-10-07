@@ -10,7 +10,7 @@ import {
     FormErrorMessage,
     type SelectOption,
 } from "@/components/ui/forms";
-
+import { trackClarityEvent } from "@/lib/clarity";
 export default function LocksFormRDV() {
     const [formData, setFormData] = useState({
         nom: "",
@@ -81,7 +81,7 @@ export default function LocksFormRDV() {
                 setIsSubmitting(false);
                 return;
             }
-
+            trackClarityEvent("demande_devis_locks")
             console.log('✅ Demande locks/tresses enregistrée avec succès');
             setIsSuccess(true);
             setFormData({ nom: "", telephone: "", email: "", prestation: "", message: "" });

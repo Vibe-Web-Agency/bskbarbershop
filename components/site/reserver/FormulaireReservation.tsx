@@ -14,6 +14,8 @@ import {
     FormWrapper,
     type SelectOption,
 } from "@/components/ui/forms";
+import { trackClarityEvent } from '@/lib/clarity';
+
 
 export default function FormulaireReservation() {
     const today = new Date().toISOString().split("T")[0];
@@ -146,16 +148,6 @@ export default function FormulaireReservation() {
         }
 
         try {
-            /*
-             * Plus de contrôle de disponibilité ici.
-             *
-             * Celui qui s'y trouvait interrogeait la base depuis le
-             * navigateur ET autorisait 2 rendez-vous par créneau, alors que
-             * l'affichage n'en annonçait qu'1 : le salon pouvait donc se
-             * retrouver avec deux clients à la même heure. Le serveur
-             * revérifie désormais, avec la seule valeur qui fait foi,
-             * `MAX_PAR_CRENEAU`, partagée avec l'affichage.
-             */
             const reponse = await fetch("/api/reservations", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -163,9 +155,6 @@ export default function FormulaireReservation() {
                     nom: formData.nom,
                     telephone: formData.telephone,
                     email: formData.email || null,
-                    // La date et l'heure partent séparément : c'est le serveur
-                    // qui les assemble dans le fuseau du salon. Les assembler
-                    // ici donnait l'heure du navigateur du visiteur.
                     date: formData.date,
                     heure: formData.heure,
                     prestation: formData.prestation,
@@ -180,6 +169,8 @@ export default function FormulaireReservation() {
                 return;
             }
 
+            // 🎯 TRACKING CLARITY : Réservation validée
+            trackClarityEvent("rdv_barber_confirme");
 
             // Formater la date pour les emails
             const dateForEmail = new Date(formData.date).toLocaleDateString('fr-FR', {
@@ -188,12 +179,10 @@ export default function FormulaireReservation() {
                 month: 'long',
                 day: 'numeric'
             });
-            // Mettre la première lettre en majuscule
             const formattedDate = dateForEmail.charAt(0).toUpperCase() + dateForEmail.slice(1);
 
             // Envoyer les emails (client + admin)
             try {
-                // Email de confirmation au client
                 if (formData.email) {
                     await fetch('/api/send-email', {
                         method: 'POST',
@@ -210,7 +199,6 @@ export default function FormulaireReservation() {
                     console.log('📧 Email confirmation client envoyé');
                 }
 
-                // Notification au gérant
                 await fetch('/api/send-email', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -227,7 +215,6 @@ export default function FormulaireReservation() {
                 console.log('📧 Notification admin envoyée');
             } catch (emailErr) {
                 console.warn('⚠️ Emails non envoyés:', emailErr);
-                // On continue même si les emails échouent
             }
 
             setIsSuccess(true);

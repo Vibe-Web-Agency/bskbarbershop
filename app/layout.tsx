@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Outfit, Playfair_Display } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
-
+import { ClarityAnalytics } from "@/components/clarity-analytics";
 // Police principale - moderne et élégante
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -109,6 +109,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           />
         </noscript>
         {children}
+        <ClarityAnalytics />
       </body>
     </html>
   );
